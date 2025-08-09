@@ -1,0 +1,163 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Form Permohonan Peminjaman Fasilitas</title>
+
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Bootstrap Icons -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+
+    <style>
+      body {
+        background-color: #f4f6f9;
+        font-family: "Segoe UI", sans-serif;
+      }
+      .container {
+        margin-top: 50px;
+        max-width: 700px;
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+      }
+      h2 {
+        color: #198754;
+        margin-bottom: 25px;
+        font-weight: 700;
+      }
+      .btn-submit {
+        background-color: #198754;
+        color: white;
+        font-weight: 600;
+      }
+      .btn-submit:hover {
+        background-color: #157347;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>
+        <i class="bi bi-file-earmark-text"></i> Permohonan Peminjaman Fasilitas
+      </h2>
+      <form method="POST" action="{% url 'permohonan_peminjaman_submit' %}">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="nama_pemohon" class="form-label">Nama Pemohon</label>
+          <input
+            type="text"
+            class="form-control"
+            id="nama_pemohon"
+            name="nama_pemohon"
+            required
+            placeholder="Masukkan nama lengkap"
+          />
+        </div>
+
+        <div class="mb-3">
+          <label for="alamat" class="form-label">Alamat Pemohon</label>
+          <input
+            type="text"
+            class="form-control"
+            id="alamat"
+            name="alamat"
+            required
+            placeholder="Masukkan alamat lengkap"
+          />
+        </div>
+
+        <div class="mb-3">
+          <label for="no_telepon" class="form-label">Nomor Telepon</label>
+          <input
+            type="tel"
+            class="form-control"
+            id="no_telepon"
+            name="no_telepon"
+            required
+            placeholder="0812xxxxxxx"
+          />
+        </div>
+
+        <div class="mb-3">
+          <label for="fasilitas_dipinjam" class="form-label"
+            >Fasilitas yang Dipinjam</label
+          >
+          <select name="fasilitas_dipinjam" required>
+            {% for fasilitas in fasilitas_list %}
+                <option value="{{ fasilitas.id }}">{{ fasilitas.nama }}</option>
+            {% endfor %}
+            </select>
+
+        </div>
+
+        <div class="mb-3">
+          <label for="tanggal_peminjaman" class="form-label"
+            >Tanggal Peminjaman</label
+          >
+          <input
+            type="date"
+            class="form-control"
+            id="tanggal_peminjaman"
+            name="tanggal_peminjaman"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label for="waktu_mulai" class="form-label">Waktu Mulai</label>
+          <input
+            type="time"
+            class="form-control"
+            id="waktu_mulai"
+            name="waktu_mulai"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label for="waktu_selesai" class="form-label">Waktu Selesai</label>
+          <input
+            type="time"
+            class="form-control"
+            id="waktu_selesai"
+            name="waktu_selesai"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label for="keperluan" class="form-label">Keperluan</label>
+          <textarea
+            class="form-control"
+            id="keperluan"
+            name="keperluan"
+            rows="3"
+            placeholder="Jelaskan keperluan peminjaman"
+            required
+          ></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-submit w-100">
+          <i class="bi bi-send-fill"></i> Kirim Permohonan
+        </button>
+      </form>
+      <a href="{% url 'index' %}" class="btn btn-outline-danger mt-3 w-100">
+        <i class="bi bi-arrow-left"></i> Kembali
+      </a>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

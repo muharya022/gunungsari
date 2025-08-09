@@ -1,0 +1,639 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sistem Jadwal Desa Gunung Sari</title>
+
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Bootstrap Icons -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <!-- FullCalendar CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* Padding body agar konten tidak tertimpa navbar fixed */
+      body {
+        background-color: #f4f6f9;
+        font-family: "Segoe UI", sans-serif;
+        padding-top: 70px; /* Sedikit lebih besar dari navbar height */
+      }
+
+      /* Navbar */
+      .navbar {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+        font-size: 0.9rem;
+      }
+
+      .navbar-brand {
+        font-size: 1.5rem;
+        font-weight: 700;
+        white-space: nowrap; /* agar teks tidak terpotong / wrap */
+      }
+
+      /* Hover animasi link navbar */
+      .nav-link {
+        padding-top: 0.25rem;
+        padding-bottom: 0.25rem;
+        position: relative;
+        transition: color 0.3s ease;
+        cursor: pointer;
+      }
+
+      .nav-link::after {
+        content: "";
+        position: absolute;
+        width: 0%;
+        height: 2px;
+        bottom: 0;
+        left: 0;
+        background-color: #d4edda; /* hijau muda */
+        transition: width 0.3s ease;
+        border-radius: 2px;
+      }
+
+      .nav-link:hover,
+      .nav-link:focus {
+        color: #c3e6cb; /* hijau terang */
+        text-decoration: none;
+      }
+
+      .nav-link:hover::after,
+      .nav-link:focus::after {
+        width: 100%;
+      }
+
+      .container {
+        max-width: 900px;
+      }
+
+      .card-custom {
+        background-color: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease-in-out;
+        text-decoration: none;
+        color: inherit;
+      }
+
+      .card-custom:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        background-color: #f8f9fa;
+      }
+
+      .icon-box {
+        font-size: 3rem;
+        color: #198754;
+      }
+
+      .card-title {
+        font-weight: bold;
+        margin-top: 15px;
+      }
+
+      /* Kalender */
+      #calendar {
+        background: white;
+        border-radius: 10px;
+        padding: 15px;
+        margin: 30px auto 50px auto;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        max-width: 700px; /* Lebar maksimal kalender */
+      }
+
+      .fc .fc-toolbar-title {
+        color: #198754; /* hijau bootstrap success */
+        font-weight: 700;
+      }
+
+      .fc .fc-button-primary {
+        background-color: #198754;
+        border-color: #198754;
+      }
+
+      .fc .fc-button-primary:hover,
+      .fc .fc-button-primary:focus {
+        background-color: #145c32;
+        border-color: #145c32;
+      }
+
+      .fc .fc-daygrid-event {
+        background-color: #198754; /* event hijau */
+        border-color: #145c32;
+        color: white;
+        cursor: pointer;
+      }
+
+      .fc .fc-daygrid-day.fc-day-today {
+        background-color: #d4edda; /* hijau muda */
+      }
+
+      /* Tombol icon melayang di pojok kanan bawah */
+      .floating-permohonan-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px; /* pindah ke kanan */
+        background-color: #198754; /* hijau bootstrap success */
+        color: white;
+        border-radius: 50%;
+        width: 56px;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        transition: background-color 0.3s ease, transform 0.3s ease;
+        z-index: 1050;
+        text-decoration: none;
+        font-size: 1.4rem;
+      }
+
+      .floating-permohonan-btn:hover {
+        background-color: #145c32; /* hijau gelap */
+        color: white;
+        transform: scale(1.15); /* membesar */
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+      }
+    </style>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Tambahkan ini di bagian <head> di bawah style kamu -->
+    <!-- Leaflet CSS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-sA+q0Y1kpIwKwQw46PeXrnzzQ3YwT/s1Qqx5B5JpF8M="
+      crossorigin=""
+    />
+
+    <style>
+      /* Tambahkan ini untuk ukuran map */
+      #map {
+        height: 400px;
+        max-width: 700px;
+        margin: 30px auto 50px auto;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+    </style>
+
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css"
+    />
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+  </head>
+  <body>
+    <nav
+      class="navbar navbar-expand-lg navbar-dark fixed-top shadow-sm"
+      style="background-color: #00301a"
+    >
+      <div class="container d-flex align-items-center">
+        <img
+          src="https://cdn.digitaldesa.com/uploads/profil/74.01.08.2023/common/300_kolakakab.png"
+          alt="Logo"
+          style="height: 50px; width: auto"
+        />
+        <div class="ms-3 d-flex flex-column" style="line-height: 1.1">
+          <span class="fw-bold text-white mb-1" style="font-size: 1.25rem">
+            Desa Gunung Sari
+          </span>
+          <span
+            class="text-white"
+            style="font-weight: normal; font-size: 0.9rem"
+          >
+            Kabupaten Kolaka
+          </span>
+        </div>
+
+        <button
+          class="navbar-toggler ms-auto"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link text-white" href="{% url 'fasilitas_list' %}"
+                >Fasilitas</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-white" href="{% url 'jadwal_list' %}"
+                >Jadwal</a
+              >
+            </li>
+            <!-- Tombol untuk membuka modal login -->
+            <button
+              type="button"
+              class="btn btn-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#loginModal"
+            >
+              Login
+            </button>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Modal Login -->
+    <div
+      class="modal fade"
+      id="loginModal"
+      tabindex="-1"
+      aria-labelledby="loginModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form method="POST" action="{% url 'login' %}">
+            {% csrf_token %}
+            <div class="modal-header">
+              <h5 class="modal-title" id="loginModalLabel">Login</h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="username"
+                  name="username"
+                  required
+                  placeholder="Masukkan username"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  id="password"
+                  name="password"
+                  required
+                  placeholder="Masukkan password"
+                />
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-success">Login</button>
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                Batal
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container text-center">
+      <h1 class="mb-3 mt-5 fw-bold">
+        Selamat Datang di Sistem Jadwal Fasilitas
+        <span class="text-success">Desa Gunung Sari</span>
+      </h1>
+
+      <p class="text-muted mb-5 px-3">
+        Sistem ini membantu warga Desa Gunung Sari untuk melihat dan mengelola
+        jadwal kegiatan serta fasilitas desa. Dengan adanya sistem ini,
+        diharapkan penggunaan fasilitas desa dapat lebih optimal dan kegiatan
+        desa dapat terjadwal dengan baik.
+      </p>
+
+      <div class="row g-4">
+        <div class="col-md-6">
+          <a href="{% url 'fasilitas_list' %}" class="card-custom d-block p-4">
+            <div class="icon-box"><i class="bi bi-house-door"></i></div>
+            <h5 class="card-title">Lihat Fasilitas</h5>
+            <p class="text-muted">Informasi fasilitas yang tersedia di desa</p>
+          </a>
+        </div>
+        <div class="col-md-6">
+          <a href="{% url 'jadwal_list' %}" class="card-custom d-block p-4">
+            <div class="icon-box"><i class="bi bi-clock-history"></i></div>
+            <h5 class="card-title">Lihat Jadwal</h5>
+            <p class="text-muted">Jadwal kegiatan desa terbaru</p>
+          </a>
+        </div>
+      </div>
+
+      <!-- Kalender Info -->
+      <p
+        class="text-center text-muted mt-5 mb-3 px-3 mx-auto"
+        style="max-width: 700px"
+      >
+        Kalender berikut menampilkan jadwal kegiatan desa secara bulanan untuk
+        memudahkan monitoring dan perencanaan.
+      </p>
+
+      <div id="calendar"></div>
+
+      <!-- Peta Lokasi -->
+      <h2 class="fw-bold mt-5 mb-3">Lokasi Fasilitas Desa Gunung Sari</h2>
+
+      <p class="text-muted mb-4 px-3 mx-auto" style="max-width: 700px">
+        Peta interaktif yang menampilkan lokasi fasilitas dan area penting di
+        Desa Gunung Sari.
+      </p>
+      <div id="map"></div>
+    </div>
+
+    <!-- Tombol icon melayang permohonan peminjaman -->
+    <a
+      href="{% url 'permohonan_peminjaman_submit' %}"
+      class="floating-permohonan-btn"
+      title="Ajukan Permohonan Peminjaman"
+    >
+      <i class="bi bi-file-earmark-text fs-4"></i>
+    </a>
+
+    <footer>
+      <div class="footer-container">
+        <!-- Kolom 1 -->
+        <div
+          class="footer-col"
+          style="display: flex; align-items: center; gap: 15px"
+        >
+          <img
+            src="https://cdn.digitaldesa.com/uploads/profil/74.01.08.2023/common/300_kolakakab.png"
+            alt="Logo"
+            class="footer-logo"
+            style="flex-shrink: 0"
+          />
+          <div>
+            <h3 style="margin: 0 0 5px 0">Pemerintah Desa Gunung Sari</h3>
+            <p style="margin: 0; color: #ddd">
+              Jl. Merdeka Desa No.3<br />
+              Desa Gunung Sari, Kecamatan Watubangga, Kabupaten Kolaka<br />
+              Provinsi Sulawesi Tenggara, 93566
+            </p>
+          </div>
+        </div>
+
+        <!-- Kolom 2 -->
+        <div class="footer-col">
+          <h3>Hubungi Kami</h3>
+          <p>
+            <span class="icon">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                fill="#ddd"
+              >
+                <path
+                  d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.27c1.21.49 2.53.76 3.88.76a1 1 0 011 1v3.5a1 1 0 01-1 1C10.07 21.38 2.62 13.93 2.62 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.35.27 2.67.76 3.88a1 1 0 01-.26 1.11l-2.2 2.2z"
+                />
+              </svg>
+            </span>
+            082274186163
+          </p>
+          <p>
+            <span class="icon">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                fill="#ddd"
+              >
+                <path
+                  d="M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zm0 2l-8 5-8-5h16zm0 12H4V8l8 5 8-5v10z"
+                />
+              </svg>
+            </span>
+            muhammadaryaalfajar@gmail.com
+          </p>
+          <p>
+            <span class="icon">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                fill="#ddd"
+              >
+                <path
+                  d="M22 12.07C22 6.48 17.52 2 12 2S2 6.48 2 12.07c0 5 3.66 9.13 8.44 9.93v-7.04H7.9v-2.89h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.1 0 2.25.2 2.25.2v2.48h-1.26c-1.24 0-1.63.77-1.63 1.56v1.87h2.78l-.44 2.89h-2.34v7.04C18.34 21.2 22 17.06 22 12.07z"
+                />
+              </svg>
+            </span>
+            <a href="#" style="color: #ddd; text-decoration: none"
+              >Facebook Desa</a
+            >
+          </p>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        Dibuat oleh Mahasiswa KKN Reguler Desa Gunung Sari 2025
+      </div>
+    </footer>
+
+    <style>
+      footer {
+        background-color: #00301a;
+        color: white;
+        padding: 40px 20px 20px; /* kasih space bawah lebih kecil */
+        font-family: "Segoe UI", sans-serif;
+        font-size: 1rem;
+      }
+
+      .footer-container {
+        max-width: 1200px;
+        margin: auto;
+        display: flex;
+        justify-content: space-between; /* agar kolom kiri kanan sejajar kiri kanan */
+        flex-wrap: wrap;
+        gap: 40px;
+      }
+
+      .footer-col {
+        flex: 1 1 45%; /* Lebar kolom kira2 setengah container, responsif */
+        min-width: 220px;
+      }
+
+      .footer-logo {
+        width: 70px;
+      }
+
+      footer h3 {
+        font-weight: 700;
+        margin-bottom: 15px;
+        font-size: 1.25rem;
+        color: #d4edda; /* hijau muda sesuai navbar hover */
+      }
+
+      footer p {
+        line-height: 1.6;
+        margin-bottom: 10px;
+        font-size: 0.95rem;
+      }
+
+      footer a {
+        color: #d4edda;
+        text-decoration: underline;
+        transition: color 0.3s ease;
+      }
+
+      footer a:hover,
+      footer a:focus {
+        color: #c3e6cb; /* hijau terang */
+        text-decoration: none;
+      }
+
+      .icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        margin-right: 8px;
+        vertical-align: middle;
+      }
+
+      .footer-bottom {
+        max-width: 1200px;
+        margin: 20px auto 0 auto;
+        text-align: center;
+        font-size: 0.9rem;
+        color: #a8b9a8;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .footer-container {
+          flex-direction: column;
+          gap: 30px;
+        }
+        .footer-col {
+          min-width: 100%;
+          flex: 1 1 100%;
+        }
+      }
+    </style>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- FullCalendar JS -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        var calendarEl = document.getElementById("calendar");
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+          themeSystem: "bootstrap5",
+          initialView: "dayGridMonth",
+          locale: "id",
+          headerToolbar: {
+            left: "prev,next today",
+            center: "title",
+            right: "dayGridMonth,timeGridWeek,timeGridDay",
+          },
+          events: "/events/",
+          eventClick: function (info) {
+            var tanggal = info.event.startStr;
+            window.location.href = `/jadwal_list/?tanggal=${tanggal}`;
+          },
+        });
+        calendar.render();
+      });
+    </script>
+    <!-- Kirim data fasilitas ke JS secara aman -->
+    {{ fasilitas_list|json_script:"data-fasilitas" }}
+
+    <script>
+      var map = L.map("map").setView(
+        [-4.506109615077847, 121.52219288553799],
+        15
+      );
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors",
+      }).addTo(map);
+
+      L.Control.geocoder({
+        defaultMarkGeocode: true,
+        placeholder: "Cari lokasi...",
+        errorMessage: "Lokasi tidak ditemukan",
+      }).addTo(map);
+
+      var markers = {};
+      var fasilitasData = JSON.parse(
+        document.getElementById("data-fasilitas").textContent
+      );
+
+      fasilitasData.forEach(function (fasilitas) {
+        if (fasilitas.latitude && fasilitas.longitude) {
+          var marker = L.marker([
+            fasilitas.latitude,
+            fasilitas.longitude,
+          ]).addTo(map);
+          marker.bindPopup(
+            "<b>" + fasilitas.nama + "</b><br>" + fasilitas.lokasi
+          );
+          markers[fasilitas.nama] = marker; // simpan marker keyed by nama
+        }
+      });
+
+      if (markers.length > 0) {
+        var group = L.featureGroup(markers);
+        map.fitBounds(group.getBounds().pad(0.1));
+      }
+      document.querySelectorAll("#list-fasilitas li").forEach(function (item) {
+        item.addEventListener("click", function () {
+          var lat = parseFloat(this.getAttribute("data-lat"));
+          var lng = parseFloat(this.getAttribute("data-lng"));
+          var nama = this.textContent.trim();
+
+          if (lat && lng && markers[nama]) {
+            map.setView([lat, lng], 16); // zoom ke lokasi marker
+            markers[nama].openPopup(); // buka popup marker
+          }
+        });
+      });
+    </script>
+
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-oH+m9aDa7phz4O3pM+Cs5ZhpLF6W8sG9nd5dOUt1pgQ="
+      crossorigin=""
+    ></script>
+  </body>
+</html>
