@@ -16,18 +16,20 @@ def login_view(request):
         if user is not None:
             login(request, user)
             messages.success(request, f"Selamat datang, {user.username}!")
-            return redirect('index')  # ganti ke halaman utama kamu
+            return redirect('index')  # Redirect ke halaman utama setelah login sukses
         else:
             messages.error(request, "Username atau password salah.")
-            # Kirim form kosong agar error bisa tampil di modal
-            return render(request, 'index.html', {'form': True})  
+            return render(request, 'index.html', {'logged_in': False})
 
-    # Kalau GET, redirect ke home atau tampilkan halaman lain
-    return redirect('index')
+    else:
+        return redirect('index')  # kalau akses GET langsung ke home
+
+from django.contrib.auth import logout
+from django.shortcuts import redirect
 
 def logout_view(request):
-    logout(request)
-    messages.info(request, "Anda telah logout.")
+    if request.method == "POST":
+        logout(request)
     return redirect('index')
 
 
@@ -163,11 +165,13 @@ def jadwal_detail(request, id):
     kegiatan = get_object_or_404(Kegiatan, id=id)
     return render(request, 'jadwal_detail.html', {'kegiatan': kegiatan})
 
-from django.shortcuts import render, redirect
+from .models import Fasilitas
 from django.contrib import messages
 from .models import PermohonanPeminjaman
 
 def permohonan_peminjaman_form(request):
+    fasilitas_list = Fasilitas.objects.all()
+
     if request.method == 'POST':
         nama_pemohon = request.POST.get('nama_pemohon')
         alamat = request.POST.get('alamat')
@@ -181,7 +185,7 @@ def permohonan_peminjaman_form(request):
         # Validasi sederhana, bisa kamu tambah
         if not all([nama_pemohon, alamat, no_telepon, fasilitas_dipinjam, tanggal_peminjaman, waktu_mulai, waktu_selesai, keperluan]):
             messages.error(request, "Semua kolom wajib diisi.")
-            return render(request, 'permohonan_peminjaman.html')
+            return render(request, 'permohonan.html', {'fasilitas_list': fasilitas_list})
 
         # Simpan data ke database
         permohonan = PermohonanPeminjaman(
@@ -195,11 +199,12 @@ def permohonan_peminjaman_form(request):
             keperluan=keperluan,
         )
         permohonan.save()
-        messages.success(request, "Permohonan berhasil dikirim.")
-        return redirect('jadwal_list')  # Ganti sesuai URL yang diinginkan
+        # tambahkan pesan sukses
+        messages.success(request, "Permohonan berhasil dikirim! Silakan tunggu persetujuan dari admin.")
+        return redirect('jadwal_list')
 
-    # Jika GET, tampilkan form kosong
-    return render(request, 'permohonan.html')
+    # Jika GET, tampilkan form kosong dengan daftar fasilitas
+    return render(request, 'permohonan.html', {'fasilitas_list': fasilitas_list})
 
 from django.http import JsonResponse
 from .models import Fasilitas
@@ -217,3 +222,49 @@ def fasilitas_json(request):
             'foto_url': f.foto.url if f.foto else '',
         })
     return JsonResponse(data, safe=False)
+
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import PermohonanPeminjaman, Kegiatan, Fasilitas
+
+def daftar_persetujuan(request):
+    permohonan_list = PermohonanPeminjaman.objects.filter(status="menunggu")
+    return render(request, "persetujuan_list.html", {"permohonan_list": permohonan_list})
+
+def persetujuan_detail(request, pk):
+    permohonan = get_object_or_404(PermohonanPeminjaman, pk=pk)
+
+    if request.method == "POST":
+        status = request.POST.get("status")
+        catatan = request.POST.get("catatan", "")
+
+        permohonan.status = status
+        permohonan.catatan = catatan
+        permohonan.save()
+
+        if status == "disetujui":
+            kegiatan = Kegiatan.objects.create(
+                nama_kegiatan=permohonan.keperluan,
+                tanggal=permohonan.tanggal_peminjaman,
+                jam_mulai=permohonan.waktu_mulai,
+                jam_selesai=permohonan.waktu_selesai,
+                penanggung_jawab=permohonan.nama_pemohon
+            )
+            fasilitas_obj = Fasilitas.objects.filter(nama=permohonan.fasilitas_dipinjam)
+            if fasilitas_obj.exists():
+                kegiatan.fasilitas.set(fasilitas_obj)
+
+        return redirect("daftar_persetujuan")
+
+    return render(request, "persetujuan_detail.html", {"permohonan": permohonan})
+
+from django.contrib import messages
+
+def setujui_permohonan(request, id):
+    # logika setujui
+    messages.success(request, "Permohonan berhasil disetujui dan masuk ke jadwal.")
+    return redirect('daftar_persetujuan')
+
+def tolak_permohonan(request, id):
+    # logika tolak
+    messages.error(request, "Permohonan ditolak dan tidak akan masuk ke jadwal.")
+    return redirect('daftar_persetujuan')

@@ -4,8 +4,8 @@ from .views import login_view, logout_view
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('login/', views.login_view, name='login'),
-    path('logout/', logout_view, name='logout'),
+    path('login/', login_view, name='login_view'),
+    path('logout/', logout_view, name='logout_view'),
     path('fasilitas/', views.fasilitas_list, name='fasilitas_list'),
     path('fasilitas_list/', views.fasilitas_list, name='fasilitas_list'),
     path('fasilitas/<int:id>/', views.fasilitas_detail, name='fasilitas_detail'),
@@ -19,4 +19,6 @@ urlpatterns = [
     path('jadwal/delete/<int:id>/', views.hapus_jadwal, name='hapus_jadwal'),
     path('permohonan/', views.permohonan_peminjaman_form, name='permohonan_peminjaman_submit'),
     path('api/fasilitas/', views.fasilitas_json, name='fasilitas-json'),
+    path("persetujuan/", views.daftar_persetujuan, name="daftar_persetujuan"),
+    path("persetujuan/<int:pk>/", views.persetujuan_detail, name="persetujuan_detail"),
 ]

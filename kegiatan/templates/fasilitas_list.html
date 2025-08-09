@@ -54,13 +54,17 @@
       <h2 class="text-success mb-4">
         <i class="bi bi-building"></i> Daftar Fasilitas
       </h2>
+        <div class="alert alert-info" role="alert">
+        Berikut adalah daftar fasilitas yang tersedia di Desa Gunung Sari. 
+        Silakan pilih sesuai kebutuhan Anda dan ajukan permohonan peminjaman.
+        </div>
 
+      {% if user.is_authenticated %}
       <!-- Tombol Tambah Fasilitas -->
       <a href="/fasilitas/tambah/" class="btn btn-success mb-4 btn-custom">
         <i class="bi bi-plus-circle"></i> Tambah Fasilitas
       </a>
-
-      {% if fasilitas %}
+      {% endif %} {% if fasilitas %}
       <div class="row g-4">
         {% for f in fasilitas %}
         <div class="col-md-6 col-lg-4">
@@ -95,6 +99,7 @@
                 >
                   <i class="bi bi-eye"></i> Detail
                 </a>
+                {% if user.is_authenticated %}
                 <a
                   href="/fasilitas/hapus/{{ f.id }}/"
                   class="btn btn-outline-danger btn-sm btn-custom"
@@ -102,6 +107,7 @@
                 >
                   <i class="bi bi-trash"></i> Hapus
                 </a>
+                {% endif %}
               </div>
             </div>
           </div>
@@ -119,6 +125,14 @@
         <i class="bi bi-arrow-left"></i> Kembali
       </a>
     </div>
+
+    {% if messages %}
+<script>
+    {% for message in messages %}
+        alert("{{ message }}");
+    {% endfor %}
+</script>
+{% endif %}
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

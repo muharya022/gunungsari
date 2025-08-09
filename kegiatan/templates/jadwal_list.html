@@ -37,10 +37,18 @@
 <div class="container">
     <h2 class="text-success mb-4"><i class="bi bi-calendar-event"></i> Jadwal Kegiatan</h2>
 
+    <div class="alert alert-info shadow-sm rounded" role="alert">
+        <i class="bi bi-info-circle"></i>
+        <strong>Catatan:</strong> Jika permohonan peminjaman disetujui, maka kegiatan akan otomatis muncul di jadwal. 
+        Permohonan dapat disetujui dalam kurun waktu <strong>1x24 jam</strong>. <strong>Tolong di cek secara berkala!!</strong>
+    </div>
+
     <!-- Tombol Tambah Jadwal -->
+    {% if user.is_authenticated %}
     <a href="{% url 'tambah_jadwal' %}" class="btn btn-success mb-3 btn-custom">
         <i class="bi bi-plus-circle"></i> Tambah Jadwal
     </a>
+    {% endif %}
 
     {% if jadwal %}
         <div class="table-responsive shadow-sm rounded">
@@ -52,7 +60,9 @@
                         <th>Nama Kegiatan</th>
                         <th>Fasilitas</th>
                         <th>Waktu</th>
+                        {% if user.is_authenticated %}
                         <th>Aksi</th>
+                        {% endif %}
                     </tr>
                 </thead>
                 <tbody>
@@ -72,10 +82,12 @@
                             </td>
                             <td>{{ j.jam_mulai|time:"H:i" }} - {{ j.jam_selesai|time:"H:i" }}</td>
                             <td>
+                                {% if user.is_authenticated %}
                                 <a href="{% url 'hapus_jadwal' j.id %}" class="btn btn-danger btn-sm btn-custom"
                                    onclick="return confirm('Yakin ingin menghapus jadwal ini?')">
                                     <i class="bi bi-trash"></i> Hapus
                                 </a>
+                                {% endif %}
                             </td>
                         </tr>
                     {% endfor %}
@@ -89,7 +101,7 @@
     {% endif %}
 
     <!-- Tombol Kembali -->
-    <a href="/" class="btn btn-outline-success mt-3 btn-custom">
+    <a href="/" class="btn btn-outline-secondary mt-3 btn-custom">
         <i class="bi bi-arrow-left"></i> Kembali
     </a>
 </div>
@@ -101,6 +113,15 @@
         });
     });
 </script>
+
+{% if messages %}
+<script>
+    {% for message in messages %}
+        alert("{{ message }}");
+    {% endfor %}
+</script>
+{% endif %}
+
 
 
 <!-- Bootstrap JS -->

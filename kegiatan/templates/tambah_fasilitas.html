@@ -24,7 +24,7 @@
   </head>
   <body>
     <div class="container">
-      <div class="card p-4">
+      <div class="card p-4 mb-5 mt-5">
         <h2 class="text-success mb-4">
           <i class="bi bi-building-add"></i> Tambah Fasilitas
         </h2>
@@ -100,7 +100,10 @@
 
     <script>
       // Inisialisasi peta
-      var map = L.map('map').setView([-4.506109615077847, 121.52219288553799], 15);
+      var map = L.map("map").setView(
+        [-4.506109615077847, 121.52219288553799],
+        15
+      );
 
       // Menambahkan tile layer
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -109,7 +112,9 @@
       }).addTo(map);
 
       // Menambahkan marker dan event click
-      var marker = L.marker([-4.506109615077847, 121.52219288553799]).addTo(map);
+      var marker = L.marker([-4.506109615077847, 121.52219288553799]).addTo(
+        map
+      );
       marker.bindPopup("Lokasi Fasilitas").openPopup();
 
       map.on("click", function (e) {
@@ -122,5 +127,13 @@
         document.getElementById("longitude").value = lng;
       });
     </script>
+
+    {% if messages %}
+    <script>
+      {% for message in messages %}
+          alert("{{ message }}");
+      {% endfor %}
+    </script>
+    {% endif %}
   </body>
 </html>

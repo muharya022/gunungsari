@@ -71,10 +71,17 @@
         {% endif %}
     </ul>
 
-    <a href="{% url 'jadwal_list' %}" class="btn btn-success btn-custom">
-        <i class="bi bi-arrow-left-circle"></i> Kembali ke daftar jadwal
+    <a href="{% url 'jadwal_list' %}" class="btn btn-outline-secondary btn-custom">
+        <i class="bi bi-arrow-left-circle"></i> Kembali
     </a>
 </div>
+{% if messages %}
+<script>
+    {% for message in messages %}
+        alert("{{ message }}");
+    {% endfor %}
+</script>
+{% endif %}
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

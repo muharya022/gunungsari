@@ -12,7 +12,6 @@ class Fasilitas(models.Model):
         return self.nama
 
 
-
 class Kegiatan(models.Model):
     nama_kegiatan = models.CharField(max_length=100)
     tanggal = models.DateField()
@@ -21,19 +20,24 @@ class Kegiatan(models.Model):
     fasilitas = models.ManyToManyField(Fasilitas)
     penanggung_jawab = models.CharField(max_length=100)
 
-from django.db import models
-
 class PermohonanPeminjaman(models.Model):
+    STATUS_CHOICES = [
+        ('menunggu', 'Menunggu'),
+        ('disetujui', 'Disetujui'),
+        ('ditolak', 'Ditolak'),
+    ]
+
     nama_pemohon = models.CharField(max_length=255)
     alamat = models.CharField(max_length=500)
     no_telepon = models.CharField(max_length=20)
-    fasilitas_dipinjam = models.CharField(max_length=100)
+    fasilitas_dipinjam = models.CharField(max_length=100)  # kalau mau bisa diganti FK ke Fasilitas
     tanggal_peminjaman = models.DateField()
     waktu_mulai = models.TimeField()
     waktu_selesai = models.TimeField()
     keperluan = models.TextField()
     tanggal_pengajuan = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='menunggu')
+    catatan = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.nama_pemohon} - {self.fasilitas_dipinjam} ({self.tanggal_peminjaman})"
-

@@ -47,7 +47,7 @@
     </style>
   </head>
   <body>
-    <div class="container">
+    <div class="container mb-5">
       <h2>
         <i class="bi bi-file-earmark-text"></i> Permohonan Peminjaman Fasilitas
       </h2>
@@ -95,10 +95,9 @@
           >
           <select name="fasilitas_dipinjam" required>
             {% for fasilitas in fasilitas_list %}
-                <option value="{{ fasilitas.id }}">{{ fasilitas.nama }}</option>
+            <option value="{{ fasilitas.nama }}">{{ fasilitas.nama }}</option>
             {% endfor %}
-            </select>
-
+          </select>
         </div>
 
         <div class="mb-3">
@@ -157,6 +156,13 @@
       </a>
     </div>
 
+    {% if messages %}
+    <script>
+      {% for message in messages %}
+          alert("{{ message }}");
+      {% endfor %}
+    </script>
+    {% endif %}
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   </body>
