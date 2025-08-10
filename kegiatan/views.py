@@ -30,6 +30,7 @@ from django.shortcuts import redirect
 def logout_view(request):
     if request.method == "POST":
         logout(request)
+    messages.success(request, f"Selamat tinggal, Admin!")
     return redirect('index')
 
 
@@ -86,6 +87,7 @@ def tambah_fasilitas(request):
             longitude=longitude
         )
         fasilitas.save()
+        messages.success(request, f"Berhasil menambah fasilitas!")
         return redirect('fasilitas_list')
     return render(request, 'tambah_fasilitas.html')
 
@@ -165,9 +167,14 @@ def jadwal_detail(request, id):
     kegiatan = get_object_or_404(Kegiatan, id=id)
     return render(request, 'jadwal_detail.html', {'kegiatan': kegiatan})
 
-from .models import Fasilitas
+from .models import Fasilitas, PermohonanPeminjaman
 from django.contrib import messages
-from .models import PermohonanPeminjaman
+from django.conf import settings
+from django.shortcuts import render, redirect
+
+# Import SDK
+from sib_api_v3_sdk import ApiClient, Configuration, TransactionalEmailsApi
+from sib_api_v3_sdk.models import SendSmtpEmail, SendSmtpEmailTo
 
 def permohonan_peminjaman_form(request):
     fasilitas_list = Fasilitas.objects.all()
@@ -181,13 +188,12 @@ def permohonan_peminjaman_form(request):
         waktu_mulai = request.POST.get('waktu_mulai')
         waktu_selesai = request.POST.get('waktu_selesai')
         keperluan = request.POST.get('keperluan')
+        email_pemohon = request.POST.get('email_pemohon')
 
-        # Validasi sederhana, bisa kamu tambah
-        if not all([nama_pemohon, alamat, no_telepon, fasilitas_dipinjam, tanggal_peminjaman, waktu_mulai, waktu_selesai, keperluan]):
+        if not all([nama_pemohon, alamat, no_telepon, fasilitas_dipinjam, tanggal_peminjaman, waktu_mulai, waktu_selesai, keperluan, email_pemohon]):
             messages.error(request, "Semua kolom wajib diisi.")
             return render(request, 'permohonan.html', {'fasilitas_list': fasilitas_list})
 
-        # Simpan data ke database
         permohonan = PermohonanPeminjaman(
             nama_pemohon=nama_pemohon,
             alamat=alamat,
@@ -197,13 +203,40 @@ def permohonan_peminjaman_form(request):
             waktu_mulai=waktu_mulai,
             waktu_selesai=waktu_selesai,
             keperluan=keperluan,
+            email_pemohon=email_pemohon,
         )
         permohonan.save()
-        # tambahkan pesan sukses
-        messages.success(request, "Permohonan berhasil dikirim! Silakan tunggu persetujuan dari admin.")
+
+        # Kirim email pakai API Brevo
+        configuration = Configuration()
+        configuration.api_key['api-key'] = settings.BREVO_API_KEY
+
+        api_instance = TransactionalEmailsApi(ApiClient(configuration))
+
+        subject = "Konfirmasi Permohonan Peminjaman Fasilitas"
+        html_content = f"""
+        <p>Halo {nama_pemohon},</p>
+        <p>Permohonan peminjaman fasilitas <b>{fasilitas_dipinjam}</b> Anda telah kami terima.<br/>
+        Silakan tunggu informasi selanjutnya dari admin.</p>
+        <p>Terima kasih.</p>
+        """
+
+        send_smtp_email = SendSmtpEmail(
+            to=[SendSmtpEmailTo(email=email_pemohon, name=nama_pemohon)],
+            sender={'email': settings.EMAIL_HOST_USER, 'name': 'Admin Fasilitas'},
+            subject=subject,
+            html_content=html_content
+        )
+
+        try:
+            api_response = api_instance.send_transac_email(send_smtp_email)
+        except Exception as e:
+            messages.error(request, f"Gagal mengirim email: {e}")
+            return render(request, 'permohonan.html', {'fasilitas_list': fasilitas_list})
+
+        messages.success(request, "Permohonan berhasil dikirim! Silakan cek email Anda untuk konfirmasi.")
         return redirect('jadwal_list')
 
-    # Jika GET, tampilkan form kosong dengan daftar fasilitas
     return render(request, 'permohonan.html', {'fasilitas_list': fasilitas_list})
 
 from django.http import JsonResponse
@@ -225,6 +258,9 @@ def fasilitas_json(request):
 
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import PermohonanPeminjaman, Kegiatan, Fasilitas
+from django.contrib import messages
+from django.core.mail import send_mail
+from django.conf import settings
 
 def daftar_persetujuan(request):
     permohonan_list = PermohonanPeminjaman.objects.filter(status="menunggu")
@@ -241,6 +277,7 @@ def persetujuan_detail(request, pk):
         permohonan.catatan = catatan
         permohonan.save()
 
+        # Jika disetujui, buat jadwal kegiatan dan set fasilitas
         if status == "disetujui":
             kegiatan = Kegiatan.objects.create(
                 nama_kegiatan=permohonan.keperluan,
@@ -253,18 +290,52 @@ def persetujuan_detail(request, pk):
             if fasilitas_obj.exists():
                 kegiatan.fasilitas.set(fasilitas_obj)
 
+        # Kirim email notifikasi sesuai status
+        kirim_notifikasi_email(permohonan)
+
+        messages.success(request, f"Permohonan berhasil {status}. Email notifikasi telah dikirim.")
         return redirect("daftar_persetujuan")
 
     return render(request, "persetujuan_detail.html", {"permohonan": permohonan})
 
-from django.contrib import messages
+from sib_api_v3_sdk import ApiClient, Configuration, TransactionalEmailsApi
+from sib_api_v3_sdk.models import SendSmtpEmail, SendSmtpEmailTo
+from django.conf import settings
 
-def setujui_permohonan(request, id):
-    # logika setujui
-    messages.success(request, "Permohonan berhasil disetujui dan masuk ke jadwal.")
-    return redirect('daftar_persetujuan')
+def kirim_notifikasi_email(permohonan):
+    configuration = Configuration()
+    configuration.api_key['api-key'] = settings.BREVO_API_KEY
+    api_instance = TransactionalEmailsApi(ApiClient(configuration))
 
-def tolak_permohonan(request, id):
-    # logika tolak
-    messages.error(request, "Permohonan ditolak dan tidak akan masuk ke jadwal.")
-    return redirect('daftar_persetujuan')
+    if permohonan.status == "disetujui":
+        subject = 'Permohonan Anda Telah Disetujui'
+        html_content = f"""
+        <p>Halo {permohonan.nama_pemohon},</p>
+        <p>Permohonan dengan ID <b>{permohonan.id}</b> untuk fasilitas "<b>{permohonan.fasilitas_dipinjam}</b>" telah disetujui oleh admin.</p>
+        <p>Catatan: {permohonan.catatan}</p>
+        <p>Terima kasih.</p>
+        """
+    elif permohonan.status == "ditolak":
+        subject = 'Permohonan Anda Ditolak'
+        html_content = f"""
+        <p>Halo {permohonan.nama_pemohon},</p>
+        <p>Mohon maaf, permohonan dengan ID <b>{permohonan.id}</b> untuk fasilitas "<b>{permohonan.fasilitas_dipinjam}</b>" telah ditolak oleh admin.</p>
+        <p>Catatan: {permohonan.catatan}</p>
+        <p>Jika ada pertanyaan, silakan hubungi admin.</p>
+        <p>Terima kasih.</p>
+        """
+    else:
+        return  # Jangan kirim email jika status lain
+
+    send_smtp_email = SendSmtpEmail(
+        to=[SendSmtpEmailTo(email=permohonan.email_pemohon, name=permohonan.nama_pemohon)],
+        sender={'email': settings.EMAIL_HOST_USER, 'name': 'Admin Fasilitas Desa Gunung Sari'},
+        subject=subject,
+        html_content=html_content
+    )
+
+    try:
+        api_instance.send_transac_email(send_smtp_email)
+    except Exception as e:
+        # Bisa juga kamu log error ini ke file log atau database
+        print(f"Error mengirim email notifikasi: {e}")

@@ -16,6 +16,7 @@
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
       rel="stylesheet"
     />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
       body {
@@ -125,13 +126,21 @@
       </div>
     </div>
 
-    {% if messages %}
-    <script>
-      {% for message in messages %}
-          alert("{{ message }}");
-      {% endfor %}
-    </script>
-    {% endif %}
+{% if messages %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    {% for message in messages %}
+      Swal.fire({
+        icon: 'info',  // bisa diganti 'success', 'error', 'warning' sesuai kebutuhan
+        title: 'Info',
+        text: "{{ message|escapejs }}",
+        confirmButtonText: 'OK'
+      });
+    {% endfor %}
+  });
+</script>
+{% endif %}
+
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

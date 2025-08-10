@@ -13,6 +13,8 @@
     />
     <!-- Leaflet CSS -->
     <link href="https://unpkg.com/leaflet/dist/leaflet.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 
     <style>
       /* Styling untuk peta */
@@ -129,11 +131,19 @@
     </script>
 
     {% if messages %}
-    <script>
-      {% for message in messages %}
-          alert("{{ message }}");
-      {% endfor %}
-    </script>
-    {% endif %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    {% for message in messages %}
+      Swal.fire({
+        icon: 'info',  // bisa diganti 'success', 'error', 'warning' sesuai kebutuhan
+        title: 'Info',
+        text: "{{ message|escapejs }}",
+        confirmButtonText: 'OK'
+      });
+    {% endfor %}
+  });
+</script>
+{% endif %}
+
   </body>
 </html>

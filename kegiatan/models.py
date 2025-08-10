@@ -30,7 +30,8 @@ class PermohonanPeminjaman(models.Model):
     nama_pemohon = models.CharField(max_length=255)
     alamat = models.CharField(max_length=500)
     no_telepon = models.CharField(max_length=20)
-    fasilitas_dipinjam = models.CharField(max_length=100)  # kalau mau bisa diganti FK ke Fasilitas
+    email_pemohon = models.EmailField()
+    fasilitas_dipinjam = models.CharField(max_length=100)
     tanggal_peminjaman = models.DateField()
     waktu_mulai = models.TimeField()
     waktu_selesai = models.TimeField()
