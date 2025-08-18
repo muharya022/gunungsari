@@ -32,13 +32,13 @@ SECRET_KEY = 'django-insecure-qk7$ebo27&0gyc*6tw67=$vl9qfh%8j^i@ms0wc$px!h7i08gu
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', "gunungsari-production.up.railway.app",
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', "gunungsari.up.railway.app",
     "gunungsari.biz.id",
     "www.gunungsari.biz.id",
     "https://gunungsari.biz.id",]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://gunungsari-production.up.railway.app",
+    "https://gunungsari.up.railway.app",
     "https://*.railway.app",
     "https://gunungsari.biz.id",
 ]
