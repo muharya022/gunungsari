@@ -36,6 +36,11 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1', "gunungsari-production.up.railway.app
     "gunungsari.biz.id",
     "www.gunungsari.biz.id",]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://gunungsari-production.up.railway.app",
+    "https://*.railway.app",
+    "https://gunungsari.biz.id",
+]
 
 # Application definition
 
