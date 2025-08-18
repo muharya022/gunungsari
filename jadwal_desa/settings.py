@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
+import dj_database_url
 import os
 from pathlib import Path
 
@@ -31,7 +32,7 @@ SECRET_KEY = 'django-insecure-qk7$ebo27&0gyc*6tw67=$vl9qfh%8j^i@ms0wc$px!h7i08gu
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.onrender.com', 'gunungsari.biz.id']
 
 
 # Application definition
@@ -54,6 +55,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'jadwal_desa.urls'
@@ -79,11 +81,17 @@ WSGI_APPLICATION = 'jadwal_desa.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL')
+    )
 }
 
 
@@ -105,8 +113,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-EMAIL_HOST_USER = 'gunungsarikolaka@gmail.com'
-BREVO_API_KEY = 'YOUR_SENDINBLUE_API_KEY_HERE'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+BREVO_API_KEY = os.getenv('BREVO_API_KEY', '')
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/

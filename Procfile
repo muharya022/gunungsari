@@ -1,0 +1,1 @@
+web: gunicorn jadwal_desa.wsgi
