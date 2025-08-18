@@ -32,7 +32,9 @@ SECRET_KEY = 'django-insecure-qk7$ebo27&0gyc*6tw67=$vl9qfh%8j^i@ms0wc$px!h7i08gu
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.onrender.com', 'gunungsari.biz.id', 'gunungsari-production.up.railway.app',]
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', "gunungsari-production.up.railway.app",
+    "gunungsari.biz.id",
+    "www.gunungsari.biz.id",]
 
 
 # Application definition
