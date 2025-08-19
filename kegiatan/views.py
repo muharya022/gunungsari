@@ -325,7 +325,7 @@ def kirim_notifikasi_email(permohonan):
         <p>Terima kasih.</p>
         """
     else:
-        return  # Jangan kirim email jika status lain
+        return
 
     send_smtp_email = SendSmtpEmail(
         to=[SendSmtpEmailTo(email=permohonan.email_pemohon, name=permohonan.nama_pemohon)],

@@ -1,0 +1,129 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ article.title }}</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .news-detail {
+      background: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      margin-top: 30px;
+    }
+    .news-detail img {
+      width: 100%;
+      max-height: 400px;
+      object-fit: cover;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+    .news-meta {
+      font-size: 0.95rem;
+      color: #6c757d;
+      margin-bottom: 15px;
+    }
+    .news-meta i {
+      color: #0d6efd;
+      margin-right: 6px;
+    }
+    .news-content {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-top: 15px;
+      white-space: pre-line;
+    }
+    .related-news a {
+      text-decoration: none;
+      color: #000;
+      transition: color 0.2s;
+    }
+    .related-news a:hover {
+      color: #0d6efd;
+      text-decoration: underline;
+    }
+    .share-buttons a {
+      margin-right: 12px;
+      text-decoration: none;
+      font-size: 1.3rem;
+      color: #0d6efd;
+      transition: color 0.2s;
+    }
+    .share-buttons a:hover {
+      color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-4">
+    <div class="row">
+      <!-- Main Content -->
+      <div class="col-lg-8 mb-4">
+        <div class="news-detail">
+          <h2>{{ article.title }}</h2>
+          <p class="news-meta">
+            <i class="bi bi-person-circle"></i> Penulis: {{ article.author }} <br>
+            <i class="bi bi-folder2-open"></i> Kategori: {{ article.category }} <br>
+            <i class="bi bi-clock-history"></i> Waktu dibuat: {{ article.created_at|date:"d M Y H:i" }} <br>
+            <i class="bi bi-eye"></i> Dilihat: {{ article.views }} kali
+          </p>
+
+          {% if article.image %}
+            <img src="{{ article.image.url }}" alt="{{ article.title }}">
+          {% endif %}
+
+          <div class="news-content">
+            {{ article.content|linebreaks }}
+          </div>
+
+          <!-- Share Buttons -->
+          <div class="mt-4 share-buttons">
+            <strong><i class="bi bi-share-fill"></i> Bagikan:</strong><br>
+            <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" target="_blank" title="Bagikan ke Facebook">
+              <i class="bi bi-facebook"></i>
+            </a>
+            <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}" target="_blank" title="Bagikan ke Twitter">
+              <i class="bi bi-twitter-x"></i>
+            </a>
+            <a href="https://wa.me/?text={{ request.build_absolute_uri }}" target="_blank" title="Bagikan ke WhatsApp">
+              <i class="bi bi-whatsapp"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar Related News -->
+      <div class="col-lg-4 mb-4">
+        <div class="related-news p-3 bg-white rounded shadow">
+          <h5><i class="bi bi-newspaper"></i> Berita Terkait</h5>
+          <ul class="list-unstyled mt-3">
+            {% for related in related_articles %}
+              <li class="mb-2">
+                <a href="{% url 'article_detail' related.pk %}">
+                  <i class="bi bi-chevron-right"></i> {{ related.title }}
+                </a>
+                <br>
+                <small class="text-muted"><i class="bi bi-calendar3"></i> {{ related.created_at|date:"d M Y" }}</small>
+              </li>
+            {% empty %}
+              <li><i class="bi bi-info-circle"></i> Tidak ada berita terkait.</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

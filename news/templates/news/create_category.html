@@ -1,0 +1,24 @@
+<div class="container mt-5">
+  <h2>Buat Kategori Berita</h2>
+  <form method="POST">
+    {% csrf_token %}
+    <div class="mb-3">
+      {{ form.name.label_tag }}
+      {{ form.name }}
+    </div>
+    <button type="submit" class="btn btn-success">Simpan</button>
+    <a href="{% url 'category_list' %}" class="btn btn-secondary">Batal</a>
+  </form>
+</div>
+
+<div class="container mt-5">
+  <h2>Daftar Kategori Berita</h2>
+  <ul class="list-group">
+    {% for cat in categories %}
+      <li class="list-group-item">{{ cat.name }}</li>
+    {% empty %}
+      <li class="list-group-item">Belum ada kategori</li>
+    {% endfor %}
+  </ul>
+  <a href="{% url 'create_category' %}" class="btn btn-primary mt-3">Tambah Kategori</a>
+</div>
