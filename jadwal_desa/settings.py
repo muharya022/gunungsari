@@ -61,6 +61,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'kegiatan.middleware.VisitorCountMiddleware',
 ]
 
 ROOT_URLCONF = 'jadwal_desa.urls'
@@ -80,6 +81,7 @@ TEMPLATES = [
     },
 ]
 
+
 WSGI_APPLICATION = 'jadwal_desa.wsgi.application'
 
 
@@ -92,7 +94,6 @@ WSGI_APPLICATION = 'jadwal_desa.wsgi.application'
 #         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
-
 
 from decouple import config
 

@@ -26,6 +26,7 @@ def login_view(request):
 
 from django.contrib.auth import logout
 from django.shortcuts import redirect
+from .models import VisitorCount
 
 def logout_view(request):
     if request.method == "POST":
@@ -33,24 +34,30 @@ def logout_view(request):
     messages.success(request, f"Selamat tinggal, Admin!")
     return redirect('index')
 
+from django.shortcuts import render
+from .models import Fasilitas, VisitorCount
+from news.models import Article
 
 def index(request):
     fasilitas_qs = Fasilitas.objects.all()
-    # Buat list dict sesuai properti yang diperlukan di JS
-    fasilitas_list = []
-    for f in fasilitas_qs:
-        fasilitas_list.append({
-            'id': f.id,
-            'nama': f.nama,
-            'lokasi': f.lokasi,
-            'latitude': f.latitude,
-            'longitude': f.longitude,
-        })
+    articles = Article.objects.all().order_by("-created_at")[:10]
+    fasilitas_list = [{
+        'id': f.id,
+        'nama': f.nama,
+        'lokasi': f.lokasi,
+        'latitude': f.latitude,
+        'longitude': f.longitude,
+    } for f in fasilitas_qs]
+
+    visitor_count, _ = VisitorCount.objects.get_or_create(id=1, defaults={'count': 0})
 
     context = {
         'fasilitas_list': fasilitas_list,
+        'visitor_count': visitor_count,
+        'articles': articles,
     }
     return render(request, 'index.html', context)
+
 
 def fasilitas_list(request):
     fasilitas = Fasilitas.objects.all()

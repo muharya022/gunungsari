@@ -143,32 +143,98 @@
         background-color: #d4edda; /* hijau muda */
       }
 
-      /* Tombol icon melayang di pojok kanan bawah */
-      .floating-permohonan-btn {
-        position: fixed;
-        bottom: 20px;
-        right: 20px; /* pindah ke kanan */
-        background-color: #198754; /* hijau bootstrap success */
-        color: white;
-        border-radius: 50%;
-        width: 56px;
-        height: 56px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-        transition: background-color 0.3s ease, transform 0.3s ease;
-        z-index: 1050;
-        text-decoration: none;
-        font-size: 1.4rem;
-      }
+.floating-btn {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: flex-end;
+    gap: 20px;
+    z-index: 1000;
+}
 
-      .floating-permohonan-btn:hover {
-        background-color: #145c32; /* hijau gelap */
-        color: white;
-        transform: scale(1.15); /* membesar */
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-      }
+.floating-btn a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    text-decoration: none;
+    color: #fff;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.25);
+    font-size: 20px;
+    line-height: 1;
+    padding: 0;
+    position: relative; /* untuk badge & tooltip */
+    transition: all 0.3s ease;
+}
+
+.floating-btn a .text {
+    margin-left: 8px;
+    white-space: nowrap;
+    opacity: 0;
+    width: 0;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    overflow: visible;
+}
+
+.floating-btn a:hover {
+    width: 150px;
+    border-radius: 30px;
+    justify-content: flex-start;
+    padding-left: 12px;
+}
+
+.floating-btn a:hover .text {
+    opacity: 1;
+    width: auto;
+}
+
+/* Warna tombol */
+.wa-button { background: #145c32; }
+.btn-permohonan { background: #0d6efd; }
+.btn-visitor { background: #ff5722; }
+
+/* Badge */
+.btn-visitor .badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #e11d48;
+    color: #fff;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 2px 5px;
+    border-radius: 9999px;
+    z-index: 10;
+}
+
+/* Tooltip di atas tombol untuk semua tombol */
+.floating-btn a .tooltip {
+    position: absolute;
+    bottom: 100%; /* di atas tombol */
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 8px;
+    background: #333;
+    color: #fff;
+    padding: 6px 10px;
+    font-size: 12px;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 10;
+}
+
+.floating-btn a:hover .tooltip {
+    opacity: 1;
+}
+
     </style>
     <link
       rel="stylesheet"
@@ -399,14 +465,130 @@
       <div id="map"></div>
     </div>
 
-    <!-- Tombol icon melayang permohonan peminjaman -->
-    <a
-      href="{% url 'permohonan_peminjaman_submit' %}"
-      class="floating-permohonan-btn"
-      title="Ajukan Permohonan Peminjaman"
-    >
-      <i class="bi bi-file-earmark-text fs-4"></i>
-    </a>
+<div class="floating-btn">
+  <!-- Tombol WA -->
+  <a href="https://wa.me/6282274186163" class="wa-button">
+    <i class="bi bi-whatsapp ps-2"></i>
+    <span class="text">WhatsApp</span>
+    <span class="tooltip">
+      Hubungi kami via WhatsApp
+    </span>
+  </a>
+
+  <!-- Tombol Permohonan -->
+  <a href="{% url 'permohonan_peminjaman_submit' %}" class="btn-permohonan">
+    <i class="bi bi-file-earmark-text ps-2"></i>
+    <span class="text">Permohonan</span>
+    <span class="tooltip">
+      Ajukan permohonan <br> peminjaman ruang
+    </span>
+  </a>
+
+  <!-- Tombol Kunjungan -->
+  <a href="#" class="btn-visitor">
+    <i class="bi bi-people ps-2"></i>
+    <span class="text">Kunjungan</span>
+    <span class="badge">{{ visitor_count.count }}</span>
+    <span class="tooltip">
+      Kunjungan <br> Hari Ini: {{ visitor_count.count }} <br>
+      Total Kunjungan: {{ visitor_count.total_count }}
+    </span>
+  </a>
+</div>
+
+<div class="container my-4">
+  <h5 class="mb-3">Berita Terbaru</h5>
+  <p class="text-muted mb-3" style="max-width: 700px">
+      Berita Update Terkini dari Desa Gunung Sari, Bisa Kamu Baca di Sini.
+  </p>
+  <div class="news-slider-wrapper">
+    <div class="news-slider d-flex">
+      {% for article in articles %}
+        <div class="card news-card shadow-sm me-3">
+          {% if article.image %}
+            <img src="{{ article.image.url }}" class="card-img-top news-img" alt="{{ article.title }}">
+          {% endif %}
+          <div class="card-body">
+            <h5 class="card-title">{{ article.title|truncatechars:50 }}</h5>
+            <p class="card-text">{{ article.content|truncatewords:5 }}</p>
+            <a href="{% url 'article_detail' article.pk %}" class="btn btn-primary btn-sm">Read More</a>
+          </div>
+        </div>
+      {% endfor %}
+      <!-- duplikat isi supaya loop animasi mulus -->
+      {% for article in articles %}
+        <div class="card news-card shadow-sm me-3">
+          {% if article.image %}
+            <img src="{{ article.image.url }}" class="card-img-top news-img" alt="{{ article.title }}">
+          {% endif %}
+          <div class="card-body">
+            <h5 class="card-title">{{ article.title|truncatechars:50 }}</h5>
+            <p class="card-text">{{ article.content|truncatewords:5 }}</p>
+            <a href="{% url 'article_detail' article.pk %}" class="btn btn-primary btn-sm">Read More</a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<style>
+.news-slider-wrapper {
+    overflow-x: auto;       /* bisa discroll manual */
+    overflow-y: hidden;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch; /* smooth di mobile */
+}
+
+.news-slider {
+    display: flex;
+    animation: scroll-left 40s linear infinite;
+}
+
+.news-slider-wrapper:hover .news-slider {
+    animation-play-state: paused; /* pause kalau user hover */
+}
+
+@keyframes scroll-left {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); } /* geser separuh karena ada duplikat */
+}
+
+.news-card {
+    width: 250px;
+    flex: 0 0 auto;
+    overflow: hidden; /* cegah konten keluar */
+    white-space: normal; /* biar teks wrap */
+}
+
+.news-card .card-title {
+    font-size: 1rem;
+    font-weight: bold;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;   /* maksimal 2 baris */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    height: 2.6em; /* biar rapi sesuai 2 baris */
+}
+
+.news-card .card-text {
+    font-size: 0.875rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;   /* maksimal 3 baris */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    height: 3.9em; /* tinggi sesuai 3 baris */
+}
+
+
+.card-img-top.news-img {
+    height: 140px;
+    width: 100%;
+    object-fit: cover;
+}
+</style>
 
 <footer class="bg-dark text-light pt-4" style="background-color: #00301a !important;">
   <div class="container-fluid ps-5 mt-3">

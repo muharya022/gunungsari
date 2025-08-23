@@ -14,6 +14,13 @@ class ArticleForm(forms.ModelForm):
             'category': forms.Select(attrs={'class': 'form-select'}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # bikin optional
+        self.fields['category'].required = False
+        self.fields['kegiatan'].required = False
+
+
 class CategoryForm(forms.ModelForm):
     class Meta:
         model = Category

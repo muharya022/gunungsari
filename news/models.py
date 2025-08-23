@@ -1,5 +1,13 @@
 from django.db import models
 from kegiatan.models import Kegiatan
+import os
+import uuid
+from django.utils.text import slugify
+
+def article_image_path(instance, filename):
+    ext = filename.split('.')[-1]
+    filename = f"{slugify(instance.title)[:50]}-{uuid.uuid4().hex[:8]}.{ext}"
+    return os.path.join("articles/", filename)
 
 class Category(models.Model):
     name = models.CharField(max_length=50)
@@ -19,3 +27,5 @@ class Article(models.Model):
 
     def __str__(self):
         return self.title
+
+

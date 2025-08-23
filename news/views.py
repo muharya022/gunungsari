@@ -17,6 +17,7 @@ def create_article(request):
             return redirect('new_list')
     else:
         form = ArticleForm()
+        print(form.errors)
 
     categories = Category.objects.all()
     category_list = Category.objects.all()
@@ -30,13 +31,26 @@ def create_article(request):
         'category_list': category_list,
     })
 
-
-
 def article_detail(request, pk):
     article = get_object_or_404(Article, pk=pk)
+
+    # Tambahkan jumlah views
     article.views += 1
-    article.save()
-    return render(request, 'news/article_detail.html', {'article': article})
+    article.save(update_fields=['views'])
+
+    # Related articles
+    if article.category:
+        related_articles = Article.objects.filter(
+            category=article.category
+        ).exclude(pk=article.pk)[:5]
+    else:
+        related_articles = Article.objects.exclude(pk=article.pk).order_by('-created_at')[:5]
+
+
+    return render(request, 'news/article_detail.html', {
+        'article': article,
+        'related_articles': related_articles,
+    })
 
 
 def news_list(request):

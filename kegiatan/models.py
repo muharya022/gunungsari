@@ -42,3 +42,14 @@ class PermohonanPeminjaman(models.Model):
 
     def __str__(self):
         return f"{self.nama_pemohon} - {self.fasilitas_dipinjam} ({self.tanggal_peminjaman})"
+
+
+from django.utils.timezone import now
+
+class VisitorCount(models.Model):
+    count = models.PositiveIntegerField(default=0)         # kunjungan hari ini
+    total_count = models.PositiveIntegerField(default=0)   # total semua kunjungan
+    last_reset = models.DateField(default=now)             # tanggal terakhir reset
+
+    def __str__(self):
+        return f"Today: {self.count}, Total: {self.total_count}"
