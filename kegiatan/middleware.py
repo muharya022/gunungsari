@@ -17,9 +17,12 @@ class VisitorCountMiddleware:
                 visitor_count.count = 0
                 visitor_count.last_reset = today
 
-            # tambah kunjungan hari ini & total
-            visitor_count.count += 1
-            visitor_count.total_count += 1
-            visitor_count.save()
+            # cek session agar visitor cuma dihitung 1 kali per hari
+            session_key = f'visited_{today}'
+            if not request.session.get(session_key, False):
+                visitor_count.count += 1
+                visitor_count.total_count += 1
+                visitor_count.save()
+                request.session[session_key] = True
 
         return response
